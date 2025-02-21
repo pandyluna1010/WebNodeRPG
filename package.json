@@ -1,0 +1,15 @@
+{
+  "name": "node-rpg",
+  "version": "1.0.0",
+  "description": "rpg built in node",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "node"
+  ],
+  "author": "a-ostrowski",
+  "license": "ISC"
+}
