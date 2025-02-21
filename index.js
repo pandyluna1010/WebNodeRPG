@@ -1,4 +1,5 @@
 const readline = require("readline");
+const file = require('fs');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -12,6 +13,7 @@ const heroine = {
     WIZ: 10,
     RIS: 10,
     Defeated: 0,
+    HighScore: 0,
 
     getStatus(){
         console.log(`Heroine:\nHP: ${heroine.HP}\nSTR: ${heroine.STR}\nWIZ: ${heroine.WIZ}\nRiS: ${heroine.RIS}\nMonsters Defeated: ${heroine.Defeated * 10}\n`);
@@ -40,15 +42,14 @@ const heroine = {
         if(monHP > 0){
             console.log(`Monster takes ${damage} damage!`);
             monster.HP = monHP;
-            promptUser();
         }else{
             console.log(`Monster takes ${damage} damage!`);
             console.log(`The monster has been defeated!`);
             heroine.getEXP();
-            monster.getEXP();
-            promptUser();
+            monster.getEXP();   
         }
 
+        monster.attackHeroine(1);
     },
     attackMonsterWIZ(attack){
       isDefeated = false;
@@ -90,13 +91,14 @@ const heroine = {
         i++;
       }
 
-      promptUser();
+      monster.attackHeroine(1);
     },
     crack(){
       let attack = Math.floor((this.WIZ * Math.floor(Math.random() * (14 - 8 + 1) + 8))/10);
       console.log(`You cast Crack!`);
       heroine.attackMonsterWIZ(attack);
-      promptUser();
+
+      monster.attackHeroine(1);
     },
     crag(){
       let attack = this.WIZ * 2;
@@ -106,9 +108,53 @@ const heroine = {
       }else{
         console.log(`You cast Crag...\nIt miss...`);
       }
-      promptUser();
+
+      monster.attackHeroine(1);
+    },
+    heal(){
+      let heal = Math.floor((this.WIZ * Math.floor(Math.random() * (12 - 6 + 1) + 6))/10);
+      let heroineHP = heroine.HP;
+
+      heroineHP += heal;
+
+      if(heroineHP > heroine.MAXHP){
+        heroine.HP = heroine.MAXHP;
+        console.log(`You cast heal!`);
+        console.log(`You heal ${heal} HP.`);
+        console.log(`You're feeling healthy!`);
+      }else{
+        heroine.HP = heroineHP;
+        console.log(`You cast heal!`);
+        console.log(`You heal ${heal} HP.`);
+      }
+
+      monster.attackHeroine(0.75);
     },
 
+    dead(){
+      console.log(`You've died... T_T\n${Math.ceil(heroine.Defeated*10)} Monster defeated.`);
+
+      if(this.Defeated > this.HighScore){
+        this.HighScore = this.Defeated;
+        console.log(`You got the new high score of ${this.HighScore*10}`);
+      }else{
+        console.log(`You did not beat the high score of: ${this.HighScore*10}`);
+      }
+
+      heroine.default();
+      monster.default();
+
+      saveGame();
+    },
+
+    default(){
+      this.HP = 10;
+      this.MAXHP = 10; 
+      this.STR = 10;
+      this.RIS = 10;
+      this.WIZ = 10;
+      this.Defeated = 0;
+    },
 }
 
 const monster = {
@@ -129,7 +175,61 @@ const monster = {
         monster.STR += ranNums[1];
         monster.WIZ += ranNums[2];
         monster.RIS += ranNums[3];
-        monster.Defeated += 0.15;
+        monster.Defeated += 0.11;
+    },
+
+    attackHeroine(debuff){
+        const attackType = Math.random();
+        let heroineHP = heroine.HP;
+        const heroineRIS = heroine.RIS;
+        const heroineWIZ = heroine.WIZ;
+
+        if(attackType == 0 ){
+          console.log(`The monster trips and falls down!`);
+        }else if( attackType > 0.5 && attackType != 0){
+          //str
+          let attack = Math.floor((this.STR * Math.floor(Math.random() * (14 - 8 + 1) + 8))/10);
+          let damage = attack - heroineRIS;
+          damage *= debuff;
+
+          if(damage < 0){
+            damage = 0
+          }
+
+          heroineHP -= Math.ceil(damage);
+          heroine.HP = heroineHP;
+
+          console.log(`The Heroine takes ${damage}.`);
+        }else{
+          //wiz
+          let attack = Math.floor((this.STR * Math.floor(Math.random() * (14 - 8 + 1) + 8))/10);
+          let damage = attack - heroineWIZ;
+          damage *= debuff;
+
+          if(damage < 0){
+            damage = 0
+          }
+
+          heroineHP -= Math.ceil(damage);
+          heroine.HP = heroineHP;
+
+          console.log(`The Heroine takes ${damage}.`);
+        }
+
+        if(heroine.HP <= 0){
+          heroine.dead();
+        }else{
+          promptUser();
+        }
+    },
+
+    default(){
+      this.HP = 5;
+      this.HPGain = 0; 
+      this.STR = 5;
+      this.RIS = 5;
+      this.WIZ = 5;
+      this.Defeated = 0;
     },
 }
 
@@ -146,7 +246,7 @@ function promptUser() {
     console.log(`Heroine HP: ${heroine.HP}`);
     console.log(`Monster HP: ${monster.HP}`);
 
-    rl.question('1) Attack 2) Magic 3) Save 4) Status 5) Quit:\n', (command) => {
+    rl.question('1) Attack 2) Magic 3) Save/Load 4) Status 5) Quit:\n', (command) => {
       switch (command) {
         case '1':
           console.log('You attack the monster...');
@@ -157,8 +257,7 @@ function promptUser() {
           castSpell();
           break;
         case '3':
-          console.log('Saving...');
-          promptUser();
+          saveLoad();
           break;
         case '4':
           status();
@@ -187,8 +286,7 @@ function promptUser() {
           heroine.crag();
           break;
         case '4':
-          console.log('Heal!');
-          promptUser();
+          heroine.heal();
           break;
         case '5':
           promptUser();
@@ -213,9 +311,101 @@ function promptUser() {
           break;         
         default:
           console.log('Invalid Number, please try again');
-          promptUser();
+          status();
       }
     });
   }
+
+  function continueGame() {
+    rl.question('1) Continue 2) Quit:\n', (command) => {
+      switch (command) {
+        case '1':
+          promptUser(); 
+          break;
+        case '2':
+          console.log('Good Bye.');
+          rl.close();
+          break;         
+        default:
+          console.log('Invalid Number, please try again');
+          gameOver();
+      }
+    });
+  } 
+
+  function saveLoad() {
+    rl.question('1) Save Game 2) Load Game:\n', (command) => {
+      switch (command) {
+        case '1':
+          saveGame(); 
+          break;
+        case '2':
+          loadGame();
+          break;         
+        default:
+          console.log('Invalid Number, please try again');
+          gameOver();
+      }
+    });
+  } 
+
+  function saveGame(){
+    const pathHeroine = "./Heroine.json"
+    const dataHeroine = {
+      HP: heroine.HP,
+      MAXHP: heroine.MAXHP,
+      STR: heroine.STR,
+      WIZ: heroine.WIZ,
+      RIS: heroine.RIS,
+      Defeated: heroine.Defeated,
+      HighScore: heroine.HighScore,
+    };
+
+    const pathMonster = "./Monster.json";
+    const dataMonster = {
+      HP: monster.HP,
+      STR: monster.STR,
+      WIZ: monster.WIZ,
+      RIS: monster.RIS,
+      Defeated: monster.Defeated,
+      HPGain: monster.HPGain,
+    };
+
+
+    try {
+      console.log("Saving...");
+      file.writeFileSync(pathHeroine, JSON.stringify(dataHeroine, null, 2), 'utf8');
+      file.writeFileSync(pathMonster, JSON.stringify(dataMonster, null, 2), 'utf8');
+      console.log("Save completed");
+      continueGame();
+    } catch (error) {
+      console.log("Save has errored!!!");
+      console.log(error);
+      rl.close();
+    }
+  }
+
+  function loadGame(){
+    const dataHeroine = file.readFileSync("./Heroine.json");
+    const dataHeroineParse = JSON.parse(dataHeroine);
+    heroine.HP = dataHeroineParse.HP;
+    heroine.MAXHP = dataHeroineParse.MAXHP;
+    heroine.STR = dataHeroineParse.STR;
+    heroine.WIZ = dataHeroineParse.WIZ;
+    heroine.RIS = dataHeroineParse.RIS;
+    heroine.Defeated = dataHeroineParse.Defeated;
+    heroine.HighScore = dataHeroineParse.HighScore;
+
+    const dataMonster = file.readFileSync("./Monster.json");
+    const dataMonsterParse = JSON.parse(dataMonster);
+    monster.HP = dataMonsterParse.HP;
+    monster.STR = dataMonsterParse.STR;
+    monster.WIZ = dataMonsterParse.WIZ;
+    monster.RIS = dataMonsterParse.RIS;
+    monster.Defeated = dataMonsterParse.Defeated;
+    monster.HPGain = dataMonsterParse.HPGain;
+
+    promptUser();
+  }
   
-  promptUser();
+loadGame();
