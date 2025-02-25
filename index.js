@@ -541,6 +541,15 @@ function promptUser() {
 
   // loads the game from the files
   function loadGame(){
+    // file paths for the heroine and monster json files
+    const heroinePath = "./Heroine.json";
+    const monsterPath = "./Monster.json";
+
+    // check if the files exists, if not run save game to create them
+    if(!file.existsSync(heroinePath) || !file.existsSync(monsterPath)){
+      saveGame();
+    }
+
     // reads the data from the heroine file
     const dataHeroine = file.readFileSync("./Heroine.json");
     // parse the heroine data into a json object
