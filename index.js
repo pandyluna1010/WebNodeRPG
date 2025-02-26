@@ -300,7 +300,7 @@ const monster = {
           heroine.HP = heroineHP;
 
           // output how much damage the heroine took
-          console.log(`The Heroine takes ${damage}.`);
+          console.log(`The Heroine takes ${Math.ceil(damage)}.`);
         }else{
           //wiz
           //generate attack amount
@@ -320,7 +320,7 @@ const monster = {
           heroine.HP = heroineHP;
 
           // output how much damage the heroine took
-          console.log(`The Heroine takes ${damage}.`);
+          console.log(`The Heroine takes ${Math.ceil(damage)}.`);
         }
 
         // checks if the heroine is defeated or not
@@ -362,24 +362,29 @@ function promptUser() {
     rl.question('1) Attack 2) Magic 3) Save/Load 4) Status 5) Quit:\n', (command) => {
       switch (command) {
         case '1':
+        case 'l':
           // attack monster
           console.log('You attack the monster...');
           heroine.attackMonsterSTR();
           break;
         case '2':
+        case ';':
           // ask which spell they wish to use
           console.log('Which spell will you use...');
           castSpell();
           break;
         case '3':
+        case '\'':
           // ask if they would like to save or load game
           saveLoad();
           break;
         case '4':
+        case 'o':
           // ask if they would like to see heroine or monster status
           status();
           break;
         case '5':
+        case 'p':
           // cloes the game
           console.log('Good Bye.');
           rl.close(); // Close the readline interface
@@ -397,22 +402,27 @@ function promptUser() {
     rl.question('1) Frizz 2) Crack 3) Crag 4) Heal 5) Back:\n', (command) => {
       switch (command) {
         case '1':
+        case 'l':
           // cast frizz
           heroine.frizz();
           break;
         case '2':
+        case ';':
           // cast crack
           heroine.crack();
           break;
         case '3':
+        case '\'':
           // cast crag
           heroine.crag();
           break;
         case '4':
+        case 'o':
           // cast heal
           heroine.heal();
           break;
         case '5':
+        case 'p':
           // goes back to prompt user
           promptUser();
           break;  
@@ -429,11 +439,13 @@ function promptUser() {
     rl.question('1) Heroin 2) Monster:\n', (command) => {
       switch (command) {
         case '1':
+        case 'l':
           // gets heroine's status
           heroine.getStatus();
           promptUser(); // Continue prompting
           break;
         case '2':
+        case ';':
           // gets monster status
           monster.getStatus();
           promptUser(); // Continue prompting
@@ -451,10 +463,12 @@ function promptUser() {
     rl.question('1) Continue 2) Quit:\n', (command) => {
       switch (command) {
         case '1':
+        case 'l':
           // contines
           promptUser(); 
           break;
         case '2':
+        case ';':
           // quits
           console.log('Good Bye.');
           rl.close();
@@ -472,10 +486,12 @@ function promptUser() {
     rl.question('1) Save Game 2) Load Game:\n', (command) => {
       switch (command) {
         case '1':
+        case 'l':
           // save game
           saveGame(); 
           break;
         case '2':
+        case ';':
           //load game
           loadGame();
           break;         
