@@ -215,11 +215,11 @@ const heroine = {
       // checks if you beat the high score or not
       if(this.Defeated > this.HighScore){
         // new high score
-        this.HighScore = this.Defeated;
-        console.log(`You got the new high score of ${this.HighScore*10}`);
+        this.HighScore = Math.ceil(this.Defeated);
+        console.log(`You got the new high score of ${Math.ceil(this.HighScore*10)}`);
       }else{
         // not the new high score
-        console.log(`You did not beat the high score of: ${this.HighScore*10}`);
+        console.log(`You did not beat the high score of: ${Math.ceil(this.HighScore*10)}`);
       }
 
       // set the stats of the heroine and monster to their defaults
