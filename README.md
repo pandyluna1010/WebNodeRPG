@@ -12,4 +12,4 @@ Should be played on a number pad, using 1-5 and the enter key, however you can a
 
 So try and get a high score!
 
-[Made by A-Ostrowski](https://github.com/pandyluna1010/NodeRPG)
+[Made by A-Ostrowski](https://github.com/pandyluna1010)
